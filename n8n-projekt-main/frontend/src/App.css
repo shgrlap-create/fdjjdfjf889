@@ -1,0 +1,21 @@
+/* App-specific styles */
+
+/* Force graph container */
+.force-graph-container canvas {
+  cursor: grab !important;
+}
+
+.force-graph-container canvas:active {
+  cursor: grabbing !important;
+}
+
+/* Smooth transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fix for force graph z-index */
+.force-graph-container {
+  position: absolute !important;
+  inset: 0;
+}

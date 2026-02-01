@@ -1,0 +1,177 @@
+{
+  "project_name": "Personal AI Movie Assistant",
+  "design_philosophy": {
+    "identity": "E1: The Anti-AI Designer",
+    "core_concept": "Minimalist Futurism / Interactive Star Map",
+    "principles": [
+      "Fusion over Imitation: Mix Star Charts with Streaming UI",
+      "Emotion First: Discovery feels like space exploration",
+      "Content is King: The graph IS the hero",
+      "Negative Space: Deep space void is essential",
+      "Contrast: Glowing nodes against deep black"
+    ]
+  },
+  "theme": {
+    "mode": "dark",
+    "strategy": "forced_dark_mode",
+    "reasoning": "Star maps and futuristic interfaces require a dark canvas to create depth and glow effects."
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Unbounded, sans-serif",
+      "body": "Outfit, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "installation": {
+      "google_fonts_import": "https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700&family=Outfit:wght@300;400;500;700&family=JetBrains+Mono:wght@400&display=swap"
+    },
+    "usage_rules": {
+      "headings": "Use 'Unbounded' for all H1-H3. Tracking tight (-0.02em). Uppercase for labels.",
+      "body": "Use 'Outfit' for all paragraphs and UI text. High legibility.",
+      "weights": {
+        "light": 300,
+        "regular": 400,
+        "bold": 700
+      }
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": {
+        "default": "#050508",
+        "paper": "#0A0A0F",
+        "overlay": "rgba(5, 5, 8, 0.8)"
+      },
+      "primary": {
+        "main": "#FFD700",
+        "glow": "rgba(255, 215, 0, 0.5)",
+        "text": "#FFFFFF"
+      },
+      "secondary": {
+        "main": "#4CC9F0",
+        "glow": "rgba(76, 201, 240, 0.3)",
+        "text": "#E0E0E0"
+      },
+      "neutral": {
+        "100": "#FFFFFF",
+        "200": "#E2E2E2",
+        "300": "#A0A0A0",
+        "400": "#525252",
+        "500": "#262626",
+        "600": "#171717",
+        "700": "#0A0A0A",
+        "800": "#050505",
+        "900": "#000000"
+      },
+      "semantic": {
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "error": "#EF4444",
+        "info": "#3B82F6"
+      }
+    },
+    "gradients": {
+      "gold_glow": "radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(0,0,0,0) 70%)",
+      "blue_glow": "radial-gradient(circle, rgba(76,201,240,0.15) 0%, rgba(0,0,0,0) 70%)"
+    }
+  },
+  "layout": {
+    "grid_system": "Tailwind Grid",
+    "spacing_scale": "Generous (2x standard)",
+    "container_width": "max-w-7xl",
+    "z_index": {
+      "canvas": 0,
+      "overlay": 10,
+      "modal": 50,
+      "toast": 100
+    },
+    "structure": {
+      "sidebar": "Fixed left, glassmorphic, collapsible",
+      "main_stage": "Full screen canvas (Graph)",
+      "detail_panel": "Slide-over right, glassmorphic"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-black hover:bg-primary/90 rounded-full px-8 py-3 font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(255,215,0,0.3)] transition-all hover:shadow-[0_0_30px_rgba(255,215,0,0.5)]",
+      "secondary": "border border-white/20 bg-white/5 text-white hover:bg-white/10 rounded-full px-6 py-2 backdrop-blur-md transition-all",
+      "ghost": "text-white/60 hover:text-white hover:bg-white/5 rounded-lg px-4 py-2 transition-colors"
+    },
+    "cards": {
+      "glass": "bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl",
+      "movie_card": "relative overflow-hidden rounded-xl border border-white/10 group hover:border-primary/50 transition-colors"
+    },
+    "inputs": {
+      "search_bar": "bg-black/60 backdrop-blur-md border border-white/20 rounded-full px-6 py-4 text-lg text-white placeholder:text-white/40 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all w-full max-w-2xl shadow-lg"
+    },
+    "graph": {
+      "library": "react-force-graph-2d",
+      "node_style": "Custom Canvas rendering: Glowing circles. Top recs = Gold, Others = Grey/Blue.",
+      "link_style": "Thin, low opacity lines (rgba(255,255,255,0.1)). Highlight on hover."
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": {
+      "heavy": "backdrop-blur-2xl bg-black/60 border-white/10",
+      "light": "backdrop-blur-md bg-black/30 border-white/5"
+    },
+    "shadows": {
+      "glow": "0 0 20px rgba(255, 215, 0, 0.15)",
+      "deep": "0 20px 50px -12px rgba(0, 0, 0, 0.9)"
+    },
+    "borders": {
+      "subtle": "1px solid rgba(255, 255, 255, 0.08)",
+      "highlight": "1px solid rgba(255, 215, 0, 0.3)"
+    }
+  },
+  "motion": {
+    "library": "framer-motion",
+    "transitions": {
+      "default": { "type": "spring", "stiffness": 300, "damping": 30 },
+      "slow": { "duration": 0.8, "ease": [0.16, 1, 0.3, 1] }
+    },
+    "micro_interactions": {
+      "hover_lift": "scale(1.02) translateY(-2px)",
+      "click_press": "scale(0.98)"
+    }
+  },
+  "assets": {
+    "icons": "lucide-react",
+    "images": {
+      "placeholders": [
+        {
+          "category": "sci-fi",
+          "url": "https://images.pexels.com/photos/3526022/pexels-photo-3526022.jpeg",
+          "alt": "Abstract Sci-Fi"
+        },
+        {
+          "category": "drama",
+          "url": "https://images.pexels.com/photos/5504137/pexels-photo-5504137.jpeg",
+          "alt": "Dramatic Scene"
+        }
+      ]
+    }
+  },
+  "accessibility": {
+    "contrast": "Ensure text on glass backgrounds has sufficient contrast. Use text-shadow if needed.",
+    "reduced_motion": "Respect prefers-reduced-motion for graph animations.",
+    "keyboard_nav": "Ensure graph nodes are focusable and navigable via keyboard."
+  },
+  "instructions_to_main_agent": [
+    "1. SETUP: Install 'react-force-graph-2d', 'framer-motion', 'lucide-react', 'clsx', 'tailwind-merge'.",
+    "2. THEME: Configure tailwind.config.js with the colors provided. Force dark mode.",
+    "3. LAYOUT: Create a layout with a full-screen absolute positioned graph container and z-indexed UI overlays.",
+    "4. GRAPH: Implement the graph first. It is the core. Use dummy data for nodes (movies).",
+    "5. GLASS: Apply the 'glass' utility classes to the Sidebar and Right Panel.",
+    "6. FONTS: Import 'Unbounded' and 'Outfit' in index.css.",
+    "7. TESTING: Add data-testid to all interactive elements (nodes, buttons, inputs)."
+  ],
+  "universal_guidelines": [
+    "Avoid generic AI aesthetics. No purple/teal gradients unless specified.",
+    "Use 2-3x more spacing than usual.",
+    "Dark colors look good when used independently without gradients.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Every interaction needs micro-animations.",
+    "Use 'sonner' for toasts."
+  ]
+}
