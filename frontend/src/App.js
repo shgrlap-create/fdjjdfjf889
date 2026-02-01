@@ -32,7 +32,10 @@ function AppRouter() {
   
   // Google OAuth handler
   const handleGoogleAuth = () => {
-    const currentUrl = window.location.origin;
+    // Use the external URL for OAuth redirect, not localhost
+    const currentUrl = window.location.hostname === 'localhost' 
+      ? 'https://film-search.preview.emergentagent.com'
+      : window.location.origin;
     const authUrl = `https://demobackend.emergentagent.com/auth/v1/env/google?redirect_url=${encodeURIComponent(currentUrl)}`;
     window.location.href = authUrl;
   };
