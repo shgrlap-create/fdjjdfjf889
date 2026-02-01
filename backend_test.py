@@ -79,32 +79,18 @@ class StarMapsAPITester:
                 return False
         return False
     
-    def test_magic_link_auth(self):
-        """Test magic link authentication flow"""
-        test_email = f"test_{int(time.time())}@example.com"
-        
-        # Send magic link
+    def test_demo_login_auth(self):
+        """Test demo login authentication flow"""
         success, response = self.run_test(
-            "Send Magic Link", "POST", "auth/magic-link", 200,
-            data={"email": test_email}
-        )
-        
-        if not success:
-            return False
-            
-        demo_token = response.get('demo_token')
-        if not demo_token:
-            self.log("❌ No demo token received", "FAIL")
-            return False
-            
-        # Verify magic link
-        success, response = self.run_test(
-            "Verify Magic Link", "POST", "auth/magic-link/verify", 200,
-            data={"token": demo_token}
+            "Demo Login", "POST", "auth/demo", 200
         )
         
         if success:
-            self.log(f"✅ Authenticated as: {response.get('email')}", "PASS")
+            user_id = response.get('user_id', '')
+            email = response.get('email', '')
+            name = response.get('name', '')
+            self.log(f"✅ Demo login successful - User: {name} ({email})", "PASS")
+            self.log(f"   User ID: {user_id}")
             return True
         return False
     
