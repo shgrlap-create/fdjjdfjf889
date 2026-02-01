@@ -1,52 +1,89 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { Toaster } from "./components/ui/sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
+// Pages
+import LandingPage from "./pages/LandingPage";
+import AuthCallback from "./pages/AuthCallback";
+import Dashboard from "./pages/Dashboard";
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+export const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
+// Auth Context
+export const AuthContext = {
+  user: null,
+  setUser: () => {},
+  isLoading: true,
+  logout: () => {}
 };
 
-function App() {
+function AppRouter() {
+  const location = useLocation();
+  
+  // Check URL fragment for session_id synchronously during render
+  // This prevents race conditions by processing new session_id FIRST
+  if (location.hash?.includes('session_id=')) {
+    return <AuthCallback />;
+  }
+  
   return (
-    <div className="App">
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/app" element={<Dashboard />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Check for existing session
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get(`${API}/auth/me`, {
+          withCredentials: true
+        });
+        setUser(response.data);
+      } catch (error) {
+        // Not authenticated
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkAuth();
+  }, []);
+  
+  const logout = async () => {
+    try {
+      await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
+    } catch (e) {
+      console.error("Logout error", e);
+    }
+    setUser(null);
+  };
+  
+  // Provide auth context globally
+  AuthContext.user = user;
+  AuthContext.setUser = setUser;
+  AuthContext.isLoading = isLoading;
+  AuthContext.logout = logout;
+
+  return (
+    <div className="min-h-screen bg-background">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
+        <AppRouter />
       </BrowserRouter>
+      <Toaster position="bottom-right" theme="dark" />
     </div>
   );
 }
