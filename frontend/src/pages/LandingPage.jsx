@@ -3,25 +3,93 @@ import { Sparkles } from 'lucide-react';
 
 const LandingPage = ({ onAuthClick }) => {
   const canvasRef = useRef(null);
+  const starsCanvasRef = useRef(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const particlesRef = useRef([]);
+  const starsRef = useRef([]);
 
-  // Cosmic dust particles
+  // Create stars with individual properties
   useEffect(() => {
-    const colors = ['cyan', 'purple', 'magenta', 'gold', 'pink'];
-    const particles = [];
-    for (let i = 0; i < 100; i++) {
-      particles.push({
+    const stars = [];
+    for (let i = 0; i < 200; i++) {
+      stars.push({
         x: Math.random() * 100,
         y: Math.random() * 100,
-        size: 2 + Math.random() * 6,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        delay: Math.random() * 12,
-        duration: 8 + Math.random() * 8
+        size: 0.5 + Math.random() * 2,
+        baseOpacity: 0.2 + Math.random() * 0.6,
+        twinkleSpeed: 0.5 + Math.random() * 2,
+        twinklePhase: Math.random() * Math.PI * 2,
+        // Each star has its own inertia factor - how much it reacts to mouse
+        inertia: 0.02 + Math.random() * 0.08, // Very low inertia for sand-like effect
+        offsetX: 0,
+        offsetY: 0,
+        targetOffsetX: 0,
+        targetOffsetY: 0
       });
     }
-    particlesRef.current = particles;
+    starsRef.current = stars;
   }, []);
+
+  // Stars canvas with individual movement (sand-like effect)
+  useEffect(() => {
+    const canvas = starsCanvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    ctx.scale(dpr, dpr);
+    
+    let animationId;
+    let time = 0;
+    
+    const animate = () => {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      
+      time += 0.016;
+      
+      starsRef.current.forEach(star => {
+        // Update target offset based on mouse position (inverted, small effect)
+        star.targetOffsetX = (mousePos.x * star.inertia * 0.5);
+        star.targetOffsetY = (mousePos.y * star.inertia * 0.5);
+        
+        // Smooth interpolation towards target (sand-like slow follow)
+        star.offsetX += (star.targetOffsetX - star.offsetX) * 0.02;
+        star.offsetY += (star.targetOffsetY - star.offsetY) * 0.02;
+        
+        // Calculate twinkle
+        const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase) * 0.5 + 0.5;
+        const opacity = star.baseOpacity * (0.3 + twinkle * 0.7);
+        
+        // Star position with individual offset
+        const x = (star.x / 100) * window.innerWidth + star.offsetX;
+        const y = (star.y / 100) * window.innerHeight + star.offsetY;
+        
+        // Draw star with glow
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, star.size * 3);
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+        gradient.addColorStop(0.5, `rgba(200, 220, 255, ${opacity * 0.3})`);
+        gradient.addColorStop(1, 'transparent');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, star.size * 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Core
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(x, y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    animate();
+    
+    return () => cancelAnimationFrame(animationId);
+  }, [mousePos]);
 
   // Realistic planet with WebGL-like canvas
   useEffect(() => {
@@ -161,20 +229,6 @@ const LandingPage = ({ onAuthClick }) => {
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.fill();
       
-      // Stars in background
-      for (let i = 0; i < 60; i++) {
-        const starX = (Math.sin(i * 127.1 + time * 0.01) * 0.5 + 0.5) * 700;
-        const starY = (Math.cos(i * 311.7) * 0.5 + 0.5) * 700;
-        const dist = Math.sqrt(Math.pow(starX - cx, 2) + Math.pow(starY - cy, 2));
-        if (dist > radius + 60) {
-          const twinkle = Math.sin(time * 2 + i * 1.3) * 0.5 + 0.5;
-          ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + twinkle * 0.5})`;
-          ctx.beginPath();
-          ctx.arc(starX, starY, 0.8 + twinkle * 1, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      
       time += 0.016;
       animationId = requestAnimationFrame(drawPlanet);
     };
@@ -183,7 +237,7 @@ const LandingPage = ({ onAuthClick }) => {
     return () => cancelAnimationFrame(animationId);
   }, []);
 
-  // Mouse parallax
+  // Mouse parallax - only for planet, stars handled separately
   useEffect(() => {
     const handleMouseMove = (e) => {
       setMousePos({
@@ -197,33 +251,24 @@ const LandingPage = ({ onAuthClick }) => {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#010204]">
-      {/* Cosmic dust particles */}
-      <div className="star-dust">
-        {particlesRef.current.map((p, i) => (
-          <div
-            key={i}
-            className={`dust-particle ${p.color}`}
-            style={{
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              width: `${p.size}px`,
-              height: `${p.size}px`,
-              animationDelay: `${-p.delay}s`,
-              animationDuration: `${p.duration}s`
-            }}
-          />
-        ))}
-      </div>
+      {/* Stars canvas - separate layer with individual movement */}
+      <canvas 
+        ref={starsCanvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ zIndex: 1 }}
+      />
       
       {/* Deep space gradient */}
       <div 
         className="absolute inset-0"
         style={{
+          zIndex: 2,
           background: `
             radial-gradient(ellipse 120% 80% at 50% 100%, rgba(30, 10, 60, 0.4) 0%, transparent 60%),
             radial-gradient(ellipse 80% 60% at 80% 20%, rgba(0, 100, 150, 0.15) 0%, transparent 50%),
             radial-gradient(ellipse 60% 50% at 20% 80%, rgba(100, 0, 100, 0.1) 0%, transparent 40%)
-          `
+          `,
+          pointerEvents: 'none'
         }}
       />
 
@@ -240,11 +285,12 @@ const LandingPage = ({ onAuthClick }) => {
       {/* Main content */}
       <div className="relative z-10 h-full flex items-center justify-center px-8">
         <div className="flex items-center gap-24 max-w-7xl">
-          {/* Planet with parallax */}
+          {/* Planet with parallax - only planet moves, not stars */}
           <div 
             className="relative flex-shrink-0"
             style={{
-              transform: `translate(${mousePos.x}px, ${mousePos.y}px)`
+              transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
+              transition: 'transform 0.1s ease-out'
             }}
           >
             <canvas 
@@ -274,7 +320,7 @@ const LandingPage = ({ onAuthClick }) => {
             <p className="text-lg text-white/60 mb-8 leading-relaxed font-light">
               Опиши своё настроение — и мы построим звёздную карту фильмов, 
               идеально подходящих именно тебе. AI подберёт уникальные рекомендации 
-              среди 50+ тщательно отобранных картин.
+              из 50+ отобранных картин.
             </p>
             
             <div className="flex flex-col gap-4">
@@ -314,7 +360,7 @@ const LandingPage = ({ onAuthClick }) => {
 
       {/* Bottom gradient */}
       <div 
-        className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
+        className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-10"
         style={{
           background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)'
         }}
