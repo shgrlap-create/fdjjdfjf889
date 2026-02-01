@@ -120,7 +120,12 @@ class FavoriteMovie(BaseModel):
 class MagicLinkRequest(BaseModel):
     email: str
 
-# ============== MOCK DATA ==============
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    avatar: Optional[str] = None  # Base64 encoded image
+
+# ============== EXTENDED MOVIE IDS FOR AI ==============
+# All 50 movie IDs for AI recommendations
 
 MOCK_MOVIES = {
     "arrival": MovieDetail(
