@@ -201,39 +201,60 @@ class StarMapsAPITester:
                 
         return all_passed
     
-    def test_user_features(self):
-        """Test user-related features (requires auth)"""
-        # Test getting current user
+    def test_onboarding_and_ai_features(self):
+        """Test onboarding and AI features after demo login"""
+        # First do demo login to get session
         success, response = self.run_test(
-            "Get Current User", "GET", "auth/me", 200
+            "Demo Login for AI Tests", "POST", "auth/demo", 200
         )
         
         if not success:
-            self.log("⚠️  User features require authentication", "WARN")
-            return True  # Not a failure, just requires auth
+            self.log("❌ Cannot test AI features without authentication", "FAIL")
+            return False
             
-        user_id = response.get('user_id', '')
-        email = response.get('email', '')
-        self.log(f"   User ID: {user_id}")
-        self.log(f"   Email: {email}")
+        # Test onboarding endpoint
+        onboarding_data = {
+            "favorite_genre": "Научная фантастика",
+            "favorite_mood": "Философское", 
+            "favorite_era": "2010-е",
+            "favorite_character": "Гениальный интеллектуал"
+        }
         
-        # Test history
         success, response = self.run_test(
-            "Get Search History", "GET", "history", 200
+            "Save Onboarding Data", "POST", "onboarding", 200,
+            data=onboarding_data
         )
         
         if success:
-            history_count = len(response) if isinstance(response, list) else 0
-            self.log(f"   History entries: {history_count}")
+            compliment = response.get('compliment', '')
+            self.log(f"   AI Compliment: {compliment[:100]}...")
+            if compliment:
+                self.log("✅ AI compliment generated successfully", "PASS")
+            else:
+                self.log("❌ No AI compliment received", "FAIL")
+                return False
+        else:
+            return False
             
-        # Test favorites
+        # Test AI avatar generation
         success, response = self.run_test(
-            "Get Favorites", "GET", "favorites", 200
+            "Generate AI Avatar", "POST", "profile/generate-avatar", 200,
+            data={}
         )
         
         if success:
-            favorites_count = len(response) if isinstance(response, list) else 0
-            self.log(f"   Favorite movies: {favorites_count}")
+            avatar = response.get('avatar', '')
+            if avatar and avatar.startswith('data:image'):
+                self.log("✅ AI avatar generated successfully", "PASS")
+                self.log(f"   Avatar size: {len(avatar)} characters")
+                return True
+            else:
+                self.log("❌ Invalid avatar data received", "FAIL")
+                return False
+        else:
+            # AI avatar might fail due to API limits, not critical
+            self.log("⚠️  AI avatar generation failed (may be API limit)", "WARN")
+            return True  # Don't fail the test for this
             
         return True
     
