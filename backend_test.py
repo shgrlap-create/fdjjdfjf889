@@ -270,7 +270,7 @@ class StarMapsAPITester:
             ("Movie Details", self.test_movie_detail),
             ("Query Validation", self.test_query_validation),
             ("Demo Login Authentication", self.test_demo_login_auth),
-            ("User Features", self.test_user_features),
+            ("Onboarding & AI Features", self.test_onboarding_and_ai_features),
         ]
         
         for test_name, test_func in tests:
