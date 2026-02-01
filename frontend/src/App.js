@@ -24,11 +24,9 @@ function AppRouter() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Check URL fragment for session_id synchronously during render
-  // This prevents race conditions by processing new session_id FIRST
-  if (location.hash?.includes('session_id=')) {
-    return <AuthCallback />;
-  }
+  // Get user from context
+  const user = AuthContext.user;
+  const isLoading = AuthContext.isLoading;
   
   // Google OAuth handler
   const handleGoogleAuth = () => {
@@ -40,16 +38,17 @@ function AppRouter() {
     window.location.href = authUrl;
   };
   
-  // Get user from context
-  const user = AuthContext.user;
-  const isLoading = AuthContext.isLoading;
-  
   // If user is authenticated, redirect to dashboard
   useEffect(() => {
     if (user && location.pathname === '/') {
       navigate('/dashboard');
     }
   }, [user, location.pathname, navigate]);
+  
+  // Check URL fragment for session_id - handle OAuth callback
+  if (location.hash?.includes('session_id=')) {
+    return <AuthCallback />;
+  }
   
   return (
     <AnimatePresence mode="wait">
