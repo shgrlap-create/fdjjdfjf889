@@ -468,7 +468,8 @@ async def add_favorite(request: Request):
     
     favorite = {"id": str(uuid.uuid4()), "user_id": user.user_id, "movie_id": movie_id, "movie_title": movie.title_ru or movie.title, "movie_poster": movie.poster, "created_at": datetime.now(timezone.utc).isoformat()}
     await db.favorites.insert_one(favorite)
-    del favorite["_id"] if "_id" in favorite else None
+    if "_id" in favorite:
+        del favorite["_id"]
     return favorite
 
 @api_router.delete("/favorites/{movie_id}")
