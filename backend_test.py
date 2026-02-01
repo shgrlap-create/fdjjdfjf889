@@ -116,14 +116,14 @@ class StarMapsAPITester:
                 links = response.get('links', [])
                 query_summary = response.get('query_summary', '')
                 
-                # Check if we get 35-45 movies as required
+                # Check if we get 15-20 movies as required
                 movie_count = len(nodes)
                 self.log(f"   Movies returned: {movie_count}")
                 self.log(f"   Links returned: {len(links)}")
                 self.log(f"   Summary: {query_summary[:100]}...")
                 
-                if 35 <= movie_count <= 50:
-                    self.log(f"✅ Movie count in expected range (35-50): {movie_count}", "PASS")
+                if 15 <= movie_count <= 20:
+                    self.log(f"✅ Movie count in expected range (15-20): {movie_count}", "PASS")
                 else:
                     self.log(f"❌ Movie count outside expected range: {movie_count}", "FAIL")
                     all_passed = False
