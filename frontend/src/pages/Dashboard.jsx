@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Clock, Heart, User, LogOut, X, Upload, Sparkles, Play, ExternalLink, Star } from 'lucide-react';
+import { Search, Clock, Heart, User, LogOut, X, Upload, Sparkles, Play, ExternalLink, Star, Mail, Send } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -21,11 +21,7 @@ const Dashboard = ({ user, onLogout }) => {
   const trailCanvasRef = useRef(null);
   const animationRef = useRef(null);
   const nodesRef = useRef([]);
-  const [canvasOffset, setCanvasOffset] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hoveredNode, setHoveredNode] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const trailRef = useRef([]);
 
   const exampleQueries = [
@@ -41,7 +37,7 @@ const Dashboard = ({ user, onLogout }) => {
     }
   }, [user]);
 
-  // Trail effect for dashboard
+  // Trail effect - smaller, more particles
   useEffect(() => {
     const canvas = trailCanvasRef.current;
     if (!canvas) return;
@@ -59,15 +55,15 @@ const Dashboard = ({ user, onLogout }) => {
     let animationId;
     
     const animate = () => {
-      ctx.fillStyle = 'rgba(10, 14, 23, 0.12)';
+      ctx.fillStyle = 'rgba(10, 14, 23, 0.1)';
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
       
       trailRef.current.forEach((p) => {
-        p.life -= 0.025;
+        p.life -= 0.035;
         p.x += p.vx;
         p.y += p.vy;
-        p.vx *= 0.97;
-        p.vy *= 0.97;
+        p.vx *= 0.95;
+        p.vy *= 0.95;
         
         if (p.life > 0) {
           ctx.fillStyle = `rgba(255, 255, 255, ${p.life * 0.2})`;
@@ -85,26 +81,28 @@ const Dashboard = ({ user, onLogout }) => {
     return () => cancelAnimationFrame(animationId);
   }, []);
 
-  // Global mouse move for trail
+  // Mouse trail - smaller, more particles
   useEffect(() => {
     let lastX = 0, lastY = 0;
     
     const handleMouseMove = (e) => {
+      // Skip if over canvas
+      if (e.target.classList.contains('graph-canvas')) return;
+      
       const dx = e.clientX - lastX;
       const dy = e.clientY - lastY;
       const speed = Math.sqrt(dx * dx + dy * dy);
       
-      setMousePos({ x: e.clientX, y: e.clientY });
-      
-      if (speed > 5) {
-        for (let i = 0; i < 1; i++) {
+      if (speed > 2) {
+        const count = Math.min(Math.floor(speed / 4), 4);
+        for (let i = 0; i < count; i++) {
           trailRef.current.push({
-            x: e.clientX + (Math.random() - 0.5) * 8,
-            y: e.clientY + (Math.random() - 0.5) * 8,
-            vx: (Math.random() - 0.5) * 1.5 - dx * 0.03,
-            vy: (Math.random() - 0.5) * 1.5 - dy * 0.03,
-            size: 1 + Math.random() * 1.5,
-            life: 0.4 + Math.random() * 0.4
+            x: e.clientX + (Math.random() - 0.5) * 5,
+            y: e.clientY + (Math.random() - 0.5) * 5,
+            vx: (Math.random() - 0.5) * 1.2 - dx * 0.02,
+            vy: (Math.random() - 0.5) * 1.2 - dy * 0.02,
+            size: 0.4 + Math.random() * 0.8,
+            life: 0.25 + Math.random() * 0.35
           });
         }
       }
@@ -202,7 +200,7 @@ const Dashboard = ({ user, onLogout }) => {
     setGeneratingAvatar(false);
   };
 
-  // Star Map Canvas - filling entire screen
+  // Star Map Canvas
   useEffect(() => {
     if (!graphData || !canvasRef.current) return;
     
@@ -219,7 +217,6 @@ const Dashboard = ({ user, onLogout }) => {
     canvas.style.height = `${containerHeight}px`;
     ctx.scale(dpr, dpr);
     
-    // Position nodes to fill entire canvas
     const nodes = graphData.nodes.map((node, i) => {
       const isTop = node.is_top;
       const angle = (i / graphData.nodes.length) * Math.PI * 2;
@@ -270,7 +267,7 @@ const Dashboard = ({ user, onLogout }) => {
         ctx.stroke();
       });
       
-      // Draw nodes - realistic stars
+      // Draw stars
       nodes.forEach((node) => {
         const pulse = Math.sin(time * 1.5 + node.pulsePhase) * 0.15 + 0.85;
         const size = node.size * pulse;
@@ -278,7 +275,7 @@ const Dashboard = ({ user, onLogout }) => {
         const isSelected = selectedMovie?.id === node.id;
         const highlight = isHovered || isSelected ? 1.3 : 1;
         
-        // Soft outer glow
+        // Soft glow
         const glowGradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, size * 6);
         glowGradient.addColorStop(0, `rgba(255, 255, 255, ${0.08 * node.glowIntensity * highlight})`);
         glowGradient.addColorStop(0.5, `rgba(200, 200, 220, ${0.03 * node.glowIntensity})`);
@@ -288,7 +285,7 @@ const Dashboard = ({ user, onLogout }) => {
         ctx.arc(node.x, node.y, size * 6, 0, Math.PI * 2);
         ctx.fill();
         
-        // Star core - white/blue tint
+        // Core
         const coreGradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, size * highlight);
         coreGradient.addColorStop(0, '#FFFFFF');
         coreGradient.addColorStop(0.5, node.is_top ? '#E8E6FF' : '#D0D4E0');
@@ -320,27 +317,19 @@ const Dashboard = ({ user, onLogout }) => {
     const canvas = canvasRef.current;
     if (!canvas || !nodesRef.current.length) return;
     
-    if (isDragging) {
-      setCanvasOffset({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
-    } else {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      let foundNode = null;
-      for (const node of nodesRef.current) {
-        const dist = Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y, 2));
-        if (dist < 25) {
-          foundNode = node.id;
-          break;
-        }
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    let foundNode = null;
+    for (const node of nodesRef.current) {
+      const dist = Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y, 2));
+      if (dist < 25) {
+        foundNode = node.id;
+        break;
       }
-      setHoveredNode(foundNode);
-      canvas.style.cursor = foundNode ? 'pointer' : 'crosshair';
     }
+    setHoveredNode(foundNode);
   };
 
   const handleCanvasClick = () => {
@@ -428,6 +417,21 @@ const Dashboard = ({ user, onLogout }) => {
               {favorites.length === 0 && <p className="text-white/20 text-xs text-center py-6">Нет избранных</p>}
             </div>
           )}
+        </div>
+
+        {/* Contacts */}
+        <div className="px-4 py-3 border-t" style={{ borderColor: 'rgba(201, 162, 39, 0.1)' }}>
+          <p className="text-xs text-white/25 mb-2 tracking-wider">КОНТАКТЫ</p>
+          <div className="flex flex-col gap-1.5">
+            <a href="mailto:rabocijakaunt74@gmail.com" className="flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors">
+              <Mail className="w-3 h-3" style={{ color: '#5090D0' }} />
+              <span className="truncate">rabocijakaunt74@gmail.com</span>
+            </a>
+            <a href="https://t.me/negrwhite" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors">
+              <Send className="w-3 h-3" style={{ color: '#5090D0' }} />
+              <span>@negrwhite</span>
+            </a>
+          </div>
         </div>
 
         <div className="p-3 border-t" style={{ borderColor: 'rgba(201, 162, 39, 0.1)' }}>
@@ -603,9 +607,24 @@ const Dashboard = ({ user, onLogout }) => {
                 placeholder="Ваше имя" />
             </div>
             
-            <button onClick={updateProfile} className="btn-primary w-full">
+            <button onClick={updateProfile} className="btn-primary w-full mb-4">
               Сохранить
             </button>
+
+            {/* Contacts in profile */}
+            <div className="pt-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+              <p className="text-xs text-white/25 mb-2 tracking-wider">КОНТАКТЫ</p>
+              <div className="flex flex-col gap-1.5">
+                <a href="mailto:rabocijakaunt74@gmail.com" className="flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors">
+                  <Mail className="w-3 h-3" style={{ color: '#5090D0' }} />
+                  <span>rabocijakaunt74@gmail.com</span>
+                </a>
+                <a href="https://t.me/negrwhite" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors">
+                  <Send className="w-3 h-3" style={{ color: '#5090D0' }} />
+                  <span>@negrwhite</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
