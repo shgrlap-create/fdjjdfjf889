@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Mail, Send } from 'lucide-react';
 
 const LandingPage = ({ onAuthClick, onDemoClick }) => {
   const starsCanvasRef = useRef(null);
   const trailCanvasRef = useRef(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showContacts, setShowContacts] = useState(false);
   const starsRef = useRef([]);
   const trailRef = useRef([]);
 
@@ -54,7 +56,6 @@ const LandingPage = ({ onAuthClick, onDemoClick }) => {
         const x = (star.x / 100) * window.innerWidth + star.offsetX;
         const y = (star.y / 100) * window.innerHeight + star.offsetY;
         
-        // Simple star dot
         ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.beginPath();
         ctx.arc(x, y, star.size, 0, Math.PI * 2);
@@ -68,7 +69,7 @@ const LandingPage = ({ onAuthClick, onDemoClick }) => {
     return () => cancelAnimationFrame(animationId);
   }, [mousePos]);
 
-  // Trail effect (white dust/shavings)
+  // Trail effect - smaller particles, more of them
   useEffect(() => {
     const canvas = trailCanvasRef.current;
     if (!canvas) return;
@@ -82,28 +83,25 @@ const LandingPage = ({ onAuthClick, onDemoClick }) => {
     let animationId;
     
     const animate = () => {
-      ctx.fillStyle = 'rgba(10, 14, 23, 0.15)';
+      ctx.fillStyle = 'rgba(10, 14, 23, 0.12)';
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
       
-      // Draw trail particles
-      trailRef.current.forEach((particle, i) => {
-        particle.life -= 0.02;
+      trailRef.current.forEach((particle) => {
+        particle.life -= 0.03;
         particle.x += particle.vx;
         particle.y += particle.vy;
-        particle.vx *= 0.98;
-        particle.vy *= 0.98;
+        particle.vx *= 0.96;
+        particle.vy *= 0.96;
         
         if (particle.life > 0) {
-          ctx.fillStyle = `rgba(255, 255, 255, ${particle.life * 0.3})`;
+          ctx.fillStyle = `rgba(255, 255, 255, ${particle.life * 0.25})`;
           ctx.beginPath();
           ctx.arc(particle.x, particle.y, particle.size * particle.life, 0, Math.PI * 2);
           ctx.fill();
         }
       });
       
-      // Remove dead particles
       trailRef.current = trailRef.current.filter(p => p.life > 0);
-      
       animationId = requestAnimationFrame(animate);
     };
     
@@ -111,7 +109,7 @@ const LandingPage = ({ onAuthClick, onDemoClick }) => {
     return () => cancelAnimationFrame(animationId);
   }, []);
 
-  // Mouse handler
+  // Mouse handler with smaller, more particles
   useEffect(() => {
     let lastX = 0, lastY = 0;
     
@@ -125,16 +123,21 @@ const LandingPage = ({ onAuthClick, onDemoClick }) => {
         y: (e.clientY / window.innerHeight - 0.5) * 20
       });
       
-      // Add trail particles on movement
-      if (speed > 3) {
-        for (let i = 0; i < 2; i++) {
+      // Check if near bottom of screen
+      const nearBottom = e.clientY > window.innerHeight - 150;
+      setShowContacts(nearBottom);
+      
+      // More particles, smaller size
+      if (speed > 2) {
+        const particleCount = Math.min(Math.floor(speed / 3), 5);
+        for (let i = 0; i < particleCount; i++) {
           trailRef.current.push({
-            x: e.clientX + (Math.random() - 0.5) * 10,
-            y: e.clientY + (Math.random() - 0.5) * 10,
-            vx: (Math.random() - 0.5) * 2 - dx * 0.05,
-            vy: (Math.random() - 0.5) * 2 - dy * 0.05,
-            size: 1 + Math.random() * 2,
-            life: 0.5 + Math.random() * 0.5
+            x: e.clientX + (Math.random() - 0.5) * 6,
+            y: e.clientY + (Math.random() - 0.5) * 6,
+            vx: (Math.random() - 0.5) * 1.5 - dx * 0.02,
+            vy: (Math.random() - 0.5) * 1.5 - dy * 0.02,
+            size: 0.5 + Math.random() * 1,  // Smaller
+            life: 0.3 + Math.random() * 0.4
           });
         }
       }
@@ -152,10 +155,10 @@ const LandingPage = ({ onAuthClick, onDemoClick }) => {
       {/* Stars */}
       <canvas ref={starsCanvasRef} className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }} />
       
-      {/* Trail effect */}
+      {/* Trail */}
       <canvas ref={trailCanvasRef} className="trail-canvas" style={{ zIndex: 2 }} />
       
-      {/* Subtle gradient overlay */}
+      {/* Gradient overlay */}
       <div className="absolute inset-0" style={{
         zIndex: 3,
         background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(30, 58, 95, 0.15) 0%, transparent 60%)',
@@ -214,6 +217,46 @@ const LandingPage = ({ onAuthClick, onDemoClick }) => {
             <div className="flex flex-col items-center">
               <span className="text-2xl font-light" style={{ color: '#C9A227' }}>AI</span>
               <span className="text-xs text-white/30 mt-1 tracking-wider">ПОДБОР</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contact sphere at bottom - appears on hover */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 flex justify-center pointer-events-none z-30 transition-all duration-700"
+        style={{
+          transform: showContacts ? 'translateY(0)' : 'translateY(80%)',
+          opacity: showContacts ? 1 : 0
+        }}
+      >
+        <div 
+          className="relative w-96 h-48 flex flex-col items-center justify-center pb-4"
+          style={{
+            background: 'radial-gradient(ellipse 100% 100% at 50% 100%, rgba(30, 80, 140, 0.4) 0%, rgba(20, 60, 120, 0.2) 40%, transparent 70%)',
+            filter: 'blur(0px)'
+          }}
+        >
+          {/* Neon glow effect */}
+          <div 
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-80 h-32 rounded-t-full"
+            style={{
+              background: 'radial-gradient(ellipse 100% 100% at 50% 100%, rgba(40, 100, 180, 0.5) 0%, rgba(30, 80, 150, 0.3) 30%, transparent 60%)',
+              filter: 'blur(20px)'
+            }}
+          />
+          
+          <div className="relative z-10 text-center pointer-events-auto">
+            <p className="text-xs text-white/40 mb-3 tracking-widest">КОНТАКТЫ</p>
+            <div className="flex flex-col gap-2">
+              <a href="mailto:rabocijakaunt74@gmail.com" className="flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors">
+                <Mail className="w-4 h-4" style={{ color: '#5090D0' }} />
+                <span>rabocijakaunt74@gmail.com</span>
+              </a>
+              <a href="https://t.me/negrwhite" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors">
+                <Send className="w-4 h-4" style={{ color: '#5090D0' }} />
+                <span>@negrwhite</span>
+              </a>
             </div>
           </div>
         </div>
