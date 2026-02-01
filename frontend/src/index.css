@@ -252,13 +252,22 @@ h3, h4, h5, h6 {
   background: rgba(201, 162, 39, 0.3);
 }
 
-/* Canvas cursor */
+/* Canvas cursor - only for star map */
 .graph-canvas {
   cursor: crosshair;
 }
 
 .graph-canvas:active {
   cursor: grabbing;
+}
+
+/* Custom cursor everywhere else */
+body {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='3' fill='none' stroke='%23C9A227' stroke-width='1'/%3E%3Ccircle cx='10' cy='10' r='1' fill='%23C9A227'/%3E%3C/svg%3E") 10 10, auto;
+}
+
+button, a, [role="button"], input, .clickable {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='4' fill='none' stroke='%23C9A227' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='1.5' fill='%23C9A227'/%3E%3C/svg%3E") 12 12, pointer;
 }
 
 /* History item */
