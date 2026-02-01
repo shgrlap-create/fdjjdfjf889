@@ -22,6 +22,7 @@ export const AuthContext = {
 
 function AppRouter() {
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Check URL fragment for session_id synchronously during render
   // This prevents race conditions by processing new session_id FIRST
@@ -29,12 +30,37 @@ function AppRouter() {
     return <AuthCallback />;
   }
   
+  // Google OAuth handler
+  const handleGoogleAuth = () => {
+    const currentUrl = window.location.origin;
+    const authUrl = `https://demobackend.emergentagent.com/auth/v1/env/google?redirect_url=${encodeURIComponent(currentUrl)}`;
+    window.location.href = authUrl;
+  };
+  
+  // Get user from context
+  const user = AuthContext.user;
+  const isLoading = AuthContext.isLoading;
+  
+  // If user is authenticated, redirect to dashboard
+  useEffect(() => {
+    if (user && location.pathname === '/') {
+      navigate('/dashboard');
+    }
+  }, [user, location.pathname, navigate]);
+  
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/app" element={<Dashboard />} />
+        <Route path="/" element={<LandingPage onAuthClick={handleGoogleAuth} />} />
+        <Route path="/dashboard" element={
+          user ? <Dashboard user={user} onLogout={AuthContext.logout} /> : 
+          isLoading ? <div className="h-screen flex items-center justify-center bg-[#010204]"><span className="text-white/50">Загрузка...</span></div> :
+          <LandingPage onAuthClick={handleGoogleAuth} />
+        } />
+        <Route path="/app" element={
+          user ? <Dashboard user={user} onLogout={AuthContext.logout} /> : 
+          <LandingPage onAuthClick={handleGoogleAuth} />
+        } />
       </Routes>
     </AnimatePresence>
   );
