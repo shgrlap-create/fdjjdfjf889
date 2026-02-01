@@ -1073,10 +1073,19 @@ async def root():
 # Include the router in the main app
 app.include_router(api_router)
 
+# Get frontend URL for CORS
+frontend_url = os.environ.get('FRONTEND_URL', 'https://film-search.preview.emergentagent.com')
+allowed_origins = [
+    frontend_url,
+    "http://localhost:3000",
+    "https://localhost:3000",
+    "https://film-search.preview.emergentagent.com"
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
