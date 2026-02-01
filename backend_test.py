@@ -248,7 +248,7 @@ class StarMapsAPITester:
             ("Movie Recommendations (Core Feature)", self.test_movie_recommendations),
             ("Movie Details", self.test_movie_detail),
             ("Query Validation", self.test_query_validation),
-            ("Authentication Flow", self.test_magic_link_auth),
+            ("Demo Login Authentication", self.test_demo_login_auth),
             ("User Features", self.test_user_features),
         ]
         
